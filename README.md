@@ -26,7 +26,7 @@ python -m ipykernel install --user --name lab2_gonchar --display-name "Python (l
 
 - `task/TASK.md` – условие лабораторной.
 - `environment.yml` – описание окружения Conda с закреплёнными версиями пакетов.
-- `notebooks/01_preparation.ipynb` – чтение исходной выгрузки и разбиение на train, validation и test.
+- `notebooks/01_preparation.ipynb` – чтение выгрузки, разбиение на train, validation и test и аудит обучающей выборки (пропуски, распределение цены и выбросы).
 - `data/interim/rent_v05_test.csv` – сырой тест в исходном формате. Создаётся при выполнении ноутбука подготовки.
 - `data/processed/` – каталог для подготовленных обучающей и валидационной выборок.
 - `modules/` – общие модули Python. Файл `modules/__init__.py` обозначает пакет `modules`, из которого ноутбуки и скрипты смогут импортировать общий код.
