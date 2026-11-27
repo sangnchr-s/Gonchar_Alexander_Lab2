@@ -11,6 +11,7 @@ MEASUREMENTS = [
     "elevator", "appliances", "pets_allowed",
 ]
 CATEGORIES = ["district", "house_type", "renovation", "furniture", "parking", "seller_type"]
+AREA_RATIO_LIMIT = 4.0
 DISTRICT_ALIASES = {
     "cоветский": "советский", "cеверный": "северный",
     "ж/д": "железнодорожный", "ж/д район": "железнодорожный",
@@ -20,7 +21,7 @@ DISTRICT_ALIASES = {
 }
 
 
-def prepare_features(raw):
+def prepare_features(raw, *, correct_total_area=False):
     """Преобразовать одно или несколько сырых объявлений по одинаковым правилам."""
     features = raw[MEASUREMENTS].apply(pd.to_numeric, errors="coerce").astype(float)
     for column in CATEGORIES:
@@ -41,6 +42,9 @@ def prepare_features(raw):
 
     total = features["total_area"].where(features["total_area"] > 0)
     living = features["living_area"]
+    if correct_total_area:
+        area_ratio = total / living.where(living > 0)
+        total = total.mask(area_ratio.gt(AREA_RATIO_LIMIT), total / 10)
     kitchen = features["kitchen_area"]
     features["area_conflict"] = ((living > total) | (kitchen > total) |
                                  (living + kitchen > total)).astype(int)
