@@ -12,6 +12,7 @@ MEASUREMENTS = [
 ]
 CATEGORIES = ["district", "house_type", "renovation", "furniture", "parking", "seller_type"]
 AREA_RATIO_LIMIT = 4.0
+METRO_DISTANCE_LIMIT_M = 15_000
 DISTRICT_ALIASES = {
     "cоветский": "советский", "cеверный": "северный",
     "ж/д": "железнодорожный", "ж/д район": "железнодорожный",
@@ -21,7 +22,7 @@ DISTRICT_ALIASES = {
 }
 
 
-def prepare_features(raw, *, correct_total_area=False):
+def prepare_features(raw, *, correct_total_area=False, correct_metro_distance=False):
     """Преобразовать одно или несколько сырых объявлений по одинаковым правилам."""
     features = raw[MEASUREMENTS].apply(pd.to_numeric, errors="coerce").astype(float)
     for column in CATEGORIES:
@@ -52,6 +53,9 @@ def prepare_features(raw, *, correct_total_area=False):
     features["kitchen_area"] = kitchen.mask((kitchen > total) | (kitchen < 0))
 
     metro = features.pop("metro_distance_m")
-    features["log_metro_distance"] = np.log1p(metro.where(metro >= 0))
+    metro = metro.where(metro >= 0)
+    if correct_metro_distance:
+        metro = metro.mask(metro.gt(METRO_DISTANCE_LIMIT_M), metro / 10)
+    features["log_metro_distance"] = np.log1p(metro)
     features["log_total_area"] = np.log1p(total)
     return features.drop(columns="total_area")
